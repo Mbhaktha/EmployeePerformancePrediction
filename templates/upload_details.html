@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Details - HR Analytics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-5">
+                <i class="fas fa-file-chart-line text-gradient me-3"></i>
+                Upload Details
+            </h1>
+            <div>
+                <a href="{{ url_for('upload_history') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-1"></i>Back to History
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>New Upload
+                </a>
+            </div>
+        </div>
+
+        <!-- Upload Information -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Upload Information
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">File Name</label>
+                                    <div class="fw-bold">{{ upload.original_filename }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Upload Date</label>
+                                    <div>{{ upload.upload_timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">File Size</label>
+                                    <div>{{ "%.1f"|format(upload.file_size / 1024) }} KB</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Total Records</label>
+                                    <div>{{ upload.total_records }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Processing Status</label>
+                                    <div>
+                                        {% if upload.processing_status == 'completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Completed
+                                            </span>
+                                        {% elif upload.processing_status == 'failed' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Failed
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Model Accuracy</label>
+                                    <div>
+                                        {% if upload.model_accuracy %}
+                                            <span class="text-success fw-bold">{{ "%.2f"|format(upload.model_accuracy * 100) }}%</span>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if upload.error_message %}
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error Message:</strong> {{ upload.error_message }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Quick Stats -->
+                {% if performance_stats %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Performance Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">High</span>
+                                <strong>{{ performance_stats.high_performers }}</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Medium</span>
+                                <strong>{{ performance_stats.medium_performers }}</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-danger">Low</span>
+                                <strong>{{ performance_stats.low_performers }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Model Metrics -->
+        {% if model_metrics %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Model Performance Metrics
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-muted">Overall Accuracy</h5>
+                            <h3 class="text-gradient">{{ "%.2f"|format(model_metrics.accuracy * 100) }}%</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-muted">F1 Score</h5>
+                            <h3 class="text-gradient">{{ "%.3f"|format(model_metrics.f1_score) }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-muted">Precision</h6>
+                                <div class="small">
+                                    <div>High: {{ "%.3f"|format(model_metrics.precision_high) }}</div>
+                                    <div>Medium: {{ "%.3f"|format(model_metrics.precision_medium) }}</div>
+                                    <div>Low: {{ "%.3f"|format(model_metrics.precision_low) }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-muted">Recall</h6>
+                                <div class="small">
+                                    <div>High: {{ "%.3f"|format(model_metrics.recall_high) }}</div>
+                                    <div>Medium: {{ "%.3f"|format(model_metrics.recall_medium) }}</div>
+                                    <div>Low: {{ "%.3f"|format(model_metrics.recall_low) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Performance Statistics -->
+        {% if performance_stats %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Performance Statistics
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="stats-item mb-3">
+                                    <label class="form-label text-muted">Average Experience</label>
+                                    <div class="fw-bold">{{ "%.1f"|format(performance_stats.avg_experience) }} years</div>
+                                </div>
+                                <div class="stats-item mb-3">
+                                    <label class="form-label text-muted">Experience Range</label>
+                                    <div class="fw-bold">{{ "%.1f"|format(performance_stats.min_experience) }} - {{ "%.1f"|format(performance_stats.max_experience) }} years</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stats-item mb-3">
+                                    <label class="form-label text-muted">Average Rating</label>
+                                    <div class="fw-bold">{{ "%.2f"|format(performance_stats.avg_rating) }}/5.0</div>
+                                </div>
+                                <div class="stats-item mb-3">
+                                    <label class="form-label text-muted">Rating Range</label>
+                                    <div class="fw-bold">{{ "%.2f"|format(performance_stats.min_rating) }} - {{ "%.2f"|format(performance_stats.max_rating) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="stats-card stats-card-success">
+                                    <div class="text-center">
+                                        <h4>{{ performance_stats.high_performers }}</h4>
+                                        <p class="mb-0">High Performers</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stats-card stats-card-warning">
+                                    <div class="text-center">
+                                        <h4>{{ performance_stats.medium_performers }}</h4>
+                                        <p class="mb-0">Medium Performers</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stats-card stats-card-danger">
+                                    <div class="text-center">
+                                        <h4>{{ performance_stats.low_performers }}</h4>
+                                        <p class="mb-0">Low Performers</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Employee Data Sample -->
+        {% if employee_data %}
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Employee Data Sample (First 10 records)
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Experience</th>
+                                <th>Rating</th>
+                                <th>Actual Performance</th>
+                                <th>Predicted Performance</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employee_data[:10] %}
+                            <tr>
+                                <td>{{ "%.1f"|format(employee.experience) }} years</td>
+                                <td>{{ "%.2f"|format(employee.rating) }}</td>
+                                <td>
+                                    {% if employee.performance_category == 'High' %}
+                                        <span class="badge bg-success">High</span>
+                                    {% elif employee.performance_category == 'Medium' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if employee.predicted_performance == 'High' %}
+                                        <span class="badge bg-success">High</span>
+                                    {% elif employee.predicted_performance == 'Medium' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if employee.confidence_score %}
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ (employee.confidence_score * 100)|round }}%"
+                                                 aria-valuenow="{{ (employee.confidence_score * 100)|round }}" 
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ "%.1f"|format(employee.confidence_score * 100) }}%
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if employee_data|length > 10 %}
+                <div class="text-center mt-3">
+                    <p class="text-muted">Showing 10 of {{ employee_data|length }} records</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

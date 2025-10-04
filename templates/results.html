@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Results - HR Performance Evaluation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-5">
+                <i class="fas fa-chart-line text-success me-3"></i>
+                Analysis Results
+            </h1>
+            <div>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Upload New File
+                </a>
+                {% if result_filename %}
+                <a href="{{ url_for('download_file', filename=result_filename) }}" class="btn btn-primary">
+                    <i class="fas fa-download me-1"></i>
+                    Download Results
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card stats-card-primary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="card-title mb-1">{{ stats.total_employees }}</h4>
+                            <p class="card-text mb-0">Total Employees</p>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card stats-card-success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="card-title mb-1">{{ stats.high_performers }}</h4>
+                            <p class="card-text mb-0">High Performers</p>
+                        </div>
+                        <i class="fas fa-star fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card stats-card-warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="card-title mb-1">{{ stats.medium_performers }}</h4>
+                            <p class="card-text mb-0">Medium Performers</p>
+                        </div>
+                        <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card stats-card-danger">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="card-title mb-1">{{ stats.low_performers }}</h4>
+                            <p class="card-text mb-0">Low Performers</p>
+                        </div>
+                        <i class="fas fa-arrow-trend-down fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock text-gradient fa-2x mb-2"></i>
+                        <h5 class="card-title">Average Experience</h5>
+                        <h3 class="text-gradient">{{ "%.1f"|format(stats.average_experience) }} years</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star text-gradient fa-2x mb-2"></i>
+                        <h5 class="card-title">Average Rating</h5>
+                        <h3 class="text-gradient">{{ "%.2f"|format(stats.average_rating) }}/5.0</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-bullseye text-gradient fa-2x mb-2"></i>
+                        <h5 class="card-title">Model Accuracy</h5>
+                        <h3 class="text-gradient">
+                            {% if stats.model_accuracy %}
+                                {{ "%.1f"|format(stats.model_accuracy * 100) }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization -->
+        {% if chart_available %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2 text-gradient"></i>
+                    Performance Analytics Dashboard
+                </h4>
+            </div>
+            <div class="card-body text-center chart-container">
+                <img src="{{ url_for('view_chart') }}" class="img-fluid" alt="Analysis Chart" style="max-width: 100%; height: auto; border-radius: 0.5rem;">
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Results Table -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Detailed Results
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    {{ data|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Legend -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Performance Categories
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success me-2">High</span>
+                            <span>Rating ≥ 4.0</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-warning me-2">Medium</span>
+                            <span>Rating 3.0 - 3.9</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-danger me-2">Low</span>
+                            <span>Rating < 3.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add styling to the results table
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('results-table');
+    if (table) {
+        table.classList.add('table-striped', 'table-hover');
+        
+        // Add badges for performance categories
+        const cells = table.getElementsByTagName('td');
+        for (let cell of cells) {
+            const text = cell.textContent.trim();
+            if (text === 'High') {
+                cell.innerHTML = '<span class="badge bg-success">High</span>';
+            } else if (text === 'Medium') {
+                cell.innerHTML = '<span class="badge bg-warning">Medium</span>';
+            } else if (text === 'Low') {
+                cell.innerHTML = '<span class="badge bg-danger">Low</span>';
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

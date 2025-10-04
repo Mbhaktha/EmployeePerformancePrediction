@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Upload History - HR Analytics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-5">
+                <i class="fas fa-history text-gradient me-3"></i>
+                Upload History
+            </h1>
+            <div>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>
+                    New Upload
+                </a>
+            </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Recent Uploads
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if uploads %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Upload Date</th>
+                                <th>Records</th>
+                                <th>Status</th>
+                                <th>Accuracy</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for upload in uploads %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-csv text-primary me-2"></i>
+                                        <div>
+                                            <div class="fw-bold">{{ upload.original_filename }}</div>
+                                            <small class="text-muted">{{ "%.1f"|format(upload.file_size / 1024) }} KB</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>{{ upload.upload_timestamp.strftime('%Y-%m-%d') }}</div>
+                                    <small class="text-muted">{{ upload.upload_timestamp.strftime('%H:%M:%S') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ upload.total_records }} records</span>
+                                </td>
+                                <td>
+                                    {% if upload.processing_status == 'completed' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Completed
+                                        </span>
+                                    {% elif upload.processing_status == 'failed' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Failed
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if upload.model_accuracy %}
+                                        <div class="text-success fw-bold">{{ "%.1f"|format(upload.model_accuracy * 100) }}%</div>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('view_upload_details', upload_id=upload.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                        {% if upload.processing_status == 'completed' %}
+                                        <a href="{{ url_for('download_file', filename='results_' + upload.upload_timestamp.strftime('%Y%m%d_%H%M%S') + '.csv') }}" 
+                                           class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-download me-1"></i>Download
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No uploads yet</h4>
+                    <p class="text-muted">Upload your first CSV file to get started with HR analytics.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-upload me-1"></i>Upload CSV File
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        {% if uploads %}
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-csv text-gradient fa-2x mb-2"></i>
+                        <h5 class="card-title">Total Uploads</h5>
+                        <h3 class="text-gradient">{{ uploads|length }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle text-gradient fa-2x mb-2"></i>
+                        <h5 class="card-title">Successful</h5>
+                        <h3 class="text-gradient">{{ uploads|selectattr('processing_status', 'equalto', 'completed')|list|length }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database text-gradient fa-2x mb-2"></i>
+                        <h5 class="card-title">Total Records</h5>
+                        <h3 class="text-gradient">{{ uploads|sum(attribute='total_records') }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line text-gradient fa-2x mb-2"></i>
+                        <h5 class="card-title">Avg. Accuracy</h5>
+                        <h3 class="text-gradient">
+                            {% set completed_uploads = uploads|selectattr('processing_status', 'equalto', 'completed')|selectattr('model_accuracy')|list %}
+                            {% if completed_uploads %}
+                                {{ "%.1f"|format((completed_uploads|sum(attribute='model_accuracy') / completed_uploads|length) * 100) }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh every 30 seconds for pending uploads
+setInterval(function() {
+    const pendingUploads = document.querySelectorAll('.badge.bg-warning');
+    if (pendingUploads.length > 0) {
+        location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}
