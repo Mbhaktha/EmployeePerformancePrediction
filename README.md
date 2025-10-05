@@ -1,86 +1,62 @@
+Employee Performance Prediction
 
+A simple Flask + Machine Learning web app that predicts employee performance.
 
-### **EmployeePerformancePrediction/**
+🚀 Features
 
-```
+* Flask backend
+
+* Pre-trained ML model (model.pkl)
+
+* HTML templates + CSS styling
+
+* Easy to run locally or deploy on Render
+
+📂 Project Structure
 EmployeePerformancePrediction/
 │
-├── app.py (or main.py)        # Main Flask app
-├── templates/                 # HTML templates
+├── app.py                # Flask app (entry point)
+├── templates/            # HTML templates
 │   ├── index.html
 │   └── result.html
-├── static/                    # CSS, JS, images
-│   ├── style.css
-│   └── (other static files)
-├── model.pkl                  # Your trained ML model
-├── requirements.txt           # Python dependencies
-├── Procfile                   # For Render deployment
-├── runtime.txt                # Python version for Render (optional but recommended)
-└── README.md                  # Project description
-```
+├── static/               # CSS, JS, images
+│   └── style.css
+├── model.pkl             # Trained ML model
+├── requirements.txt      # Dependencies
+├── Procfile              # For Render deployment
+├── runtime.txt           # Python version
+└── README.md             # This file
 
----
+⚙️ Installation & Running Locally
 
-### **1️⃣ Create/verify files**
+* Clone the repository
 
-**app.py** – your Flask code.
-**templates/** – all HTML files.
-**static/** – all CSS/JS/images.
-**model.pkl** – trained ML model.
-**requirements.txt** – list of packages:
-
-Example minimal `requirements.txt`:
-
-```
-Flask==2.3.4
-pandas==2.1.1
-scikit-learn==1.3.2
-numpy==1.26.1
-```
-
-**Procfile** – for Render:
-
-```
-web: python app.py
-```
-
-**runtime.txt** – specify Python version (optional):
-
-```
-python-3.11
-```
-
-**README.md** – copy the ready-to-use README I gave you above.
-
----
-
-### **2️⃣ Steps to prepare the folder**
-
-1. Make a folder:
-
-```bash
-mkdir EmployeePerformancePrediction
+git clone https://github.com/your-username/EmployeePerformancePrediction.git
 cd EmployeePerformancePrediction
-```
 
-2. Place all your files **inside this folder** as shown above.
 
-3. Check your folder looks correct:
+* Create virtual environment (optional but recommended)
 
-```bash
-tree
-```
+python -m venv venv
+venv\Scripts\activate     # On Windows
+source venv/bin/activate  # On Mac/Linux
 
-(Windows may need `dir /s` instead of `tree`)
 
-4. Once verified, zip the folder (optional) or **push directly to GitHub**:
+* Install dependencies
 
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/your-username/EmployeePerformancePrediction.git
-git push -u origin main
-```
+pip install -r requirements.txt
 
+
+* Run the Flask app
+
+python app.py
+
+
+*Open in browser
+Go to 👉 http://127.0.0.1:5000
+Screenshots
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/f95132e1-05d1-4447-afc8-b467709c2cdc" />
+
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/ebdd432f-deb8-4020-ade6-56b6025010f5" />
+
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/9aa79793-bd0b-4d57-8b15-57fe458445c7" />
